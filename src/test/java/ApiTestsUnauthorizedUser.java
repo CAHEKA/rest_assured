@@ -31,7 +31,7 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     public void testGetProducts(RequestSpecification userSpec) {
         with()
                 .spec(userSpec)
-                .get("/products")
+                .get(PRODUCTS_ENDPOINT)
                 .then()
                 .statusCode(200)
                 .and().extract().as(new ObjectMapper().getTypeFactory().constructCollectionType(List.class, Product.class));
@@ -40,28 +40,40 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("provideSpecs")
     public void testAddNewProduct(RequestSpecification userSpec) {
-        Product product = new Product(UUID.randomUUID().toString(), "Electronics", 12.99, 5.0);
+        Product product = Product.builder()
+                .name(UUID.randomUUID().toString())
+                .category("Electronics")
+                .price(10.99)
+                .discount(10.0)
+                .build();
+
         given()
                 .spec(userSpec)
                 .body(product)
                 .when()
-                .post("/products")
+                .post(PRODUCTS_ENDPOINT)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("provideSpecs")
     public void testAddExistingProduct(RequestSpecification userSpec) {
-        Product product = new Product("HP Pavilion Laptop", "Electronics", 10.99, 10.0);
+        Product product = Product.builder()
+                .name("HP Pavilion Laptop")
+                .category("Electronics")
+                .price(10.99)
+                .discount(10.0)
+                .build();
+
         given()
                 .spec(userSpec)
                 .body(product)
                 .when()
-                .post("/products")
+                .post(PRODUCTS_ENDPOINT)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
@@ -70,7 +82,7 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     public void testGetProductById(RequestSpecification userSpec) {
         with()
                 .spec(userSpec)
-                .get("/products/{product_id}", 1)
+                .get(PRODUCTS_ENDPOINT + "/{id}", 1)
                 .then()
                 .statusCode(200)
                 .extract().as(Product.class);
@@ -79,14 +91,20 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("provideSpecs")
     public void testUpdateProduct(RequestSpecification userSpec) {
-        Product existProduct = new Product(UUID.randomUUID().toString(), "Electronics", 10.99, 10.0);
+        Product product = Product.builder()
+                .name(UUID.randomUUID().toString())
+                .category("Electronics")
+                .price(10.99)
+                .discount(10.0)
+                .build();
+
         given()
                 .spec(userSpec)
-                .body(existProduct)
+                .body(product)
                 .when()
-                .put("/products/{product_id}", 2)
+                .put(PRODUCTS_ENDPOINT + "/{id}", 2)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
@@ -95,9 +113,9 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     public void testDeleteProduct(RequestSpecification userSpec) {
         with()
                 .spec(userSpec)
-                .delete("/products/{product_id}", 3)
+                .delete(PRODUCTS_ENDPOINT + "/{id}", 3)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
@@ -106,9 +124,9 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     public void testGetShoppingCart(RequestSpecification userSpec) {
         with()
                 .spec(userSpec)
-                .get("/cart")
+                .get(CART_ENDPOINT)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
@@ -120,9 +138,9 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
                 .spec(userSpec)
                 .body(productCard)
                 .when()
-                .post("/cart")
+                .post(CART_ENDPOINT)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
@@ -132,9 +150,9 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
         testAddToCart(userSpec);
         with()
                 .spec(userSpec)
-                .delete("/cart/{product_id}", 1)
+                .delete(CART_ENDPOINT + "/{id}", 1)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 
@@ -143,9 +161,9 @@ public class ApiTestsUnauthorizedUser extends BaseTest {
     public void testRemoveMissingItem(RequestSpecification userSpec) {
         with()
                 .spec(userSpec)
-                .delete("/cart/{product_id}", 100)
+                .delete(CART_ENDPOINT + "/{id}", 100)
                 .then()
-                .statusCode(403)
+                .statusCode(401)
                 .extract().as(ResponseМessage.class);
     }
 }
